@@ -5,7 +5,7 @@
 	<!-- Use static transform publisher because each frames doesn`t change through time-->
 	<!-- 			    static_transform_publisher, broadcaster name, x y z yaw pitch roll frame_id child_frame_id period_in_ms -->
 	<node pkg="tf" type="static_transform_publisher" name="base_link_to_laser" args="0.15 0 0.06 0 0 0 imu_link laser 30" >
-	<!-- base_link to imu_link will be provided by the iahrs_driver -->
+	<!-- base_link to imu_link will be provided by the iahrs_driver (Set to be equal -->
 	<node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0 0 0 0 base_footprint imu_link 30" />
 	<!-- odom to base_footprint transform will be provided by the robot_pose_ekf node -->
 	<!-- map to odom will be provided by the AMCL -->
