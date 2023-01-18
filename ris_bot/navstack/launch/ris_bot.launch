@@ -4,9 +4,9 @@
 	<!-- Transformation Configuration -->
 	<!-- Use static transform publisher because each frames doesn`t change through time-->
 	<!-- 			    static_transform_publisher, broadcaster name, x y z yaw pitch roll frame_id child_frame_id period_in_ms -->
-	<node pkg="tf" type="static_transform_publisher" name="base_link_to_laser" args="0.15 0 0.06 0 0 0 imu_link laser 30" >
+	<node pkg="tf" type="static_transform_publisher" name="base_link_to_laser" args="0.15 0 0.06 0 0 0 base_link laser 30" />
 	<!-- base_link to imu_link will be provided by the iahrs_driver -->
-	<node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0 0 0 0 base_footprint imu_link 30" />
+	<node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0 0 0 0 base_footprint base_link 30" />
 	<!-- odom to base_footprint transform will be provided by the robot_pose_ekf node -->
 	<!-- map to odom will be provided by the AMCL -->
 	<node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom 30" />	
@@ -35,7 +35,7 @@
     <param name = "reduction"                   value = "4.33"/> 	<!-- Reduction Ratio : 1/4.33 -->
     <param name = "reverse_direction"           value = "0"/>       <!-- 0: forward, 1: reverse -->
     <param name = "maxrpm"                      value = "1000"/>    <!-- unit: RPM -->
-    <param name = "motor_posi"                  value = "0"/>       <!-- motor pisition 0: hall sensor, 1: encoder -->
+    <param name = "motor_posi"                  value = "1"/>       <!-- motor pisition 0: hall sensor, 1: encoder -->
     <param name = "encoder_PPR"                 value = "4096"/>    <!-- if use encoder position, encoder PPR -->
     <param name = "position_proportion_gain"    value = "20"/>      <!-- reference PID 203(PID_GAIN) -->
     <param name = "speed_proportion_gain"       value = "50"/>      <!-- reference PID 203(PID_GAIN) -->
@@ -80,15 +80,27 @@
 	<param name="self_diagnose" value="false"/>
 	</node>
     
+    	<!-- Map File -->
+  	<arg name="map_file" default="/home/ris/catkin_ws/maps/test.yaml"/>
+	
+  	<!-- Map Server -->
+  	<!-- Publish: /map, /map_metadata -->
+  	<node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)" />
+	
+  	<!-- Add AMCL example for differential drive robots for Localization -->
+  	<!-- Subscribe: /scan, /tf, /initialpose, /map -->
+  	<!-- Publish: /amcl_pose, /particlecloud, /tf -->
+  	<include file="$(find amcl)/examples/amcl_diff.launch"/>
+    
 	<!-- Move Base Node -->
 	<!-- Subscribe: /move_base_simple/goal -->
 	<!-- Publish: /cmd_vel -->
 	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-    <rosparam file="$(find navstack_pub)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
-    <rosparam file="$(find navstack_pub)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
-    <rosparam file="$(find navstack_pub)/param/local_costmap_params.yaml" command="load" ns="local_costmap" />
-    <rosparam file="$(find navstack_pub)/param/global_costmap_params.yaml" command="load" ns="global_costmap" />
-    <rosparam file="$(find navstack_pub)/param/base_local_planner_params.yaml" command="load" />
-	</node>
-
+    	<rosparam file="$(find navstack_pub)/param/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+    	<rosparam file="$(find navstack_pub)/param/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+    	<rosparam file="$(find navstack_pub)/param/local_costmap_params.yaml" command="load" ns="local_costmap"/>
+    	<rosparam file="$(find navstack_pub)/param/global_costmap_params.yaml" command="load" ns="global_costmap"/>
+    	<rosparam file="$(find navstack_pub)/param/base_local_planner_params.yaml" command="load"/>
+  </node>
+	
 </launch>
